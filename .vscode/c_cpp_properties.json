@@ -1,0 +1,32 @@
+{
+    "configurations": [
+        {
+            "name": "Mac",
+            "defines": [
+                "ARDUINO=10800",
+                "USBCON",
+                "__AVR_ATmega2560__"
+            ],
+            "includePath": [
+                "${workspaceRoot}",
+                "${workspaceRoot}/**",
+                "/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/**",
+                "/Applications/Arduino.app/Contents/Java/tools/**",
+                "/Applications/hardware/tools/**",
+                "/Applications/libraries/**",
+                "/Users/${env:USERNAME}/Documents/Arduino/hardware/tools/**",
+                "/Users/${env:USERNAME}/Documents/Arduino/libraries/**",
+                "/Applications/Arduino.app/Contents/Java/hardware/tools/avr/**"
+            ],
+            "forcedInclude": [
+                "/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/variants/mega/pins_arduino.h",
+                "/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/cores/arduino/Arduino.h"
+            ],
+            "intelliSenseMode": "gcc-x64",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "compilerPath": "/usr/bin/clang"
+        }
+    ],
+    "version": 4
+}
