@@ -1,0 +1,1 @@
+# **Custom Serial Gateway for Arduino based on [MySensors](https://www.mysensors.org/)**
