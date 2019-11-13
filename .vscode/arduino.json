@@ -1,5 +1,0 @@
-{
-    "port": "/dev/cu.usbserial-14A220",
-    "board": "arduino:avr:mega",
-    "configuration": "cpu=atmega2560"
-}
