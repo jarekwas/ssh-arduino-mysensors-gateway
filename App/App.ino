@@ -6,6 +6,8 @@
 #define MY_RS485_DE_PIN 42
 #define MY_RS485_BAUD_RATE 9600
 
+
+
 #include <MySensors.h>
 #include "conf.hpp"
 
@@ -13,7 +15,7 @@
 #include "conf/prod.hpp"
 #else
 
-#include "conf/def.hpp"
+#include "conf/dev.hpp"
 
 #endif
 
@@ -24,6 +26,23 @@
 #include "libs/light/Lamp.hpp"
 #include "libs/light/Button.hpp"
 #include "libs/light/Zone.hpp"
+
+using namespace Core; 
+
+uint8_t sensorsCount = 0;
+uint8_t controllersCount = 0;
+
+#define SENSORS_COUNT 25
+Sensor *sensors[SENSORS_COUNT];
+
+#define CONTROLLERS_COUNT 0
+Controller *controllers[CONTROLLERS_COUNT];
+
+Module moduleManager;
+
+
+#include <MySensors.h>
+#include "conf.hpp"
 
 Light::Lamp light_bathroom;
 Light::Lamp light_living_room;
@@ -53,7 +72,6 @@ Light::Zone Zone_garden;
 Light::Zone light_zone_living_room;
 Light::Zone light_zone_bathroom;
 
-
 #define GARDEN_LIGHTS_COUNT 4
 Binary *gardenLights[GARDEN_LIGHTS_COUNT];
 
@@ -63,16 +81,6 @@ Binary *livingRoomLamps[LIVING_ROOM_LIGHTS_COUNT];
 #define BATHROOM_LAMPS_COUNT 2
 Binary *bathroomLamps[BATHROOM_LAMPS_COUNT];
 
-#define SENSORS_COUNT 25
-Sensor *sensors[SENSORS_COUNT];
-
-#define CONTROLLERS_COUNT 0
-Controller *controllers[CONTROLLERS_COUNT];
-
-uint8_t sensorsCount = 0;
-uint8_t controllersCount = 0;
-Module moduleManager;
-
 void initLights() {
 
 
@@ -81,69 +89,69 @@ void initLights() {
     uint8_t bathroomLampsCount = 0;
 
 
-    light_bathroom = Light::Lamp(&LIGHT_SENSOR_DATA_BATHROOM);
+    light_bathroom = Light::Lamp(&Light::LIGHT_SENSOR_DATA_BATHROOM);
     bathroomLamps[bathroomLampsCount++] = &light_bathroom;
     sensors[sensorsCount++] = &light_bathroom;
 
-    light_bathroom_cabinet = Light::Lamp(&LIGHT_SENSOR_DATA_BATHROOM_CABINET);
+    light_bathroom_cabinet = Light::Lamp(&Light::LIGHT_SENSOR_DATA_BATHROOM_CABINET);
     bathroomLamps[bathroomLampsCount++] = &light_bathroom_cabinet;
     sensors[sensorsCount++] = &light_bathroom_cabinet;
 
-    light_living_room = Light::Lamp(&LIGHT_SENSOR_DATA_LIVING_ROOM);
+    light_living_room = Light::Lamp(&Light::LIGHT_SENSOR_DATA_LIVING_ROOM);
     livingRoomLamps[livingRoomLampsCount++] = &light_living_room;
     sensors[sensorsCount++] = &light_living_room;
 
-    light_bedroom = Light::Lamp(&LIGHT_SENSOR_DATA_BEDROOM);
+    light_bedroom = Light::Lamp(&Light::LIGHT_SENSOR_DATA_BEDROOM);
     sensors[sensorsCount++] = &light_bedroom;
 
-    light_kitchen = Light::Lamp(&LIGHT_SENSOR_DATA_KITCHEN);
+    light_kitchen = Light::Lamp(&Light::LIGHT_SENSOR_DATA_KITCHEN);
     livingRoomLamps[livingRoomLampsCount++] = &light_kitchen;
     sensors[sensorsCount++] = &light_kitchen;
 
-    light_kitchen_cabinet = Light::Lamp(&LIGHT_SENSOR_DATA_KITCHEN_CABINET);
+    light_kitchen_cabinet = Light::Lamp(&Light::LIGHT_SENSOR_DATA_KITCHEN_CABINET);
     sensors[sensorsCount++] = &light_kitchen_cabinet;
 
-    light_treatment_plant = Light::Lamp(&LIGHT_SENSOR_DATA_TREATMENT_PLANT);
+    light_treatment_plant = Light::Lamp(&Light::LIGHT_SENSOR_DATA_TREATMENT_PLANT);
     sensors[sensorsCount++] = &light_treatment_plant;
 
-    light_terrace = Light::Lamp(&LIGHT_SENSOR_DATA_TERRACE);
+    light_terrace = Light::Lamp(&Light::LIGHT_SENSOR_DATA_TERRACE);
     gardenLights[gardenLightsCount++] = &light_terrace;
     sensors[sensorsCount++] = &light_terrace;
 
-    light_garden_front = Light::Lamp(&LIGHT_SENSOR_DATA_GARDEN_FRONT);
+    light_garden_front = Light::Lamp(&Light::LIGHT_SENSOR_DATA_GARDEN_FRONT);
     gardenLights[gardenLightsCount++] = &light_garden_front;
     sensors[sensorsCount++] = &light_garden_front;
 
-    light_garden_alley = Light::Lamp(&LIGHT_SENSOR_DATA_GARDEN_ALLEY);
+    light_garden_alley = Light::Lamp(&Light::LIGHT_SENSOR_DATA_GARDEN_ALLEY);
     gardenLights[gardenLightsCount++] = &light_garden_alley;
     sensors[sensorsCount++] = &light_garden_alley;
 
-    light_garden_corner = Light::Lamp(&LIGHT_SENSOR_DATA_GARDEN_CORNER);
+    light_garden_corner = Light::Lamp(&Light::LIGHT_SENSOR_DATA_GARDEN_CORNER);
     gardenLights[gardenLightsCount++] = &light_garden_corner;
     sensors[sensorsCount++] = &light_garden_corner;
 
 
-    light_bathroom_button = Light::Button(&BUTTON_SENSOR_DATA_BATHROOM, &light_bathroom);
+    light_bathroom_button = Light::Button(&Light::BUTTON_SENSOR_DATA_BATHROOM, &light_bathroom);
     sensors[sensorsCount++] = &light_bathroom_button;
-    light_living_room_button = Light::Button(&BUTTON_SENSOR_DATA_LIVING_ROOM, &light_living_room);
+    light_living_room_button = Light::Button(&Light::BUTTON_SENSOR_DATA_LIVING_ROOM, &light_living_room);
     sensors[sensorsCount++] = &light_living_room_button;
-    light_bedroom_button = Light::Button(&BUTTON_SENSOR_DATA_BEDROOM, &light_bedroom);
+    light_bedroom_button = Light::Button(&Light::BUTTON_SENSOR_DATA_BEDROOM, &light_bedroom);
     sensors[sensorsCount++] = &light_bedroom_button;
-    light_kitchen_button = Light::Button(&BUTTON_SENSOR_DATA_KITCHEN, &light_kitchen);
+    light_kitchen_button = Light::Button(&Light::BUTTON_SENSOR_DATA_KITCHEN, &light_kitchen);
     sensors[sensorsCount++] = &light_kitchen_button;
-    light_kitchen_cabinet_button = Light::Button(&BUTTON_SENSOR_DATA_KITCHEN_CABINET, &light_kitchen_cabinet);
+    light_kitchen_cabinet_button = Light::Button(&Light::BUTTON_SENSOR_DATA_KITCHEN_CABINET, &light_kitchen_cabinet);
     sensors[sensorsCount++] = &light_kitchen_cabinet_button;
-    light_bathroom_cabinet_button = Light::Button(&BUTTON_SENSOR_DATA_BATHROOM_CABINET, &light_bathroom_cabinet);
+    light_bathroom_cabinet_button = Light::Button(&Light::BUTTON_SENSOR_DATA_BATHROOM_CABINET, &light_bathroom_cabinet);
     sensors[sensorsCount++] = &light_bathroom_cabinet_button;
-    light_treatment_plant_button = Light::Button(&BUTTON_SENSOR_DATA_TREATMENT_PLANT, &light_treatment_plant);
+    light_treatment_plant_button = Light::Button(&Light::BUTTON_SENSOR_DATA_TREATMENT_PLANT, &light_treatment_plant);
     sensors[sensorsCount++] = &light_treatment_plant_button;
-    light_terrace_button = Light::Button(&BUTTON_SENSOR_DATA_TERRACE, &light_terrace);
+    light_terrace_button = Light::Button(&Light::BUTTON_SENSOR_DATA_TERRACE, &light_terrace);
     sensors[sensorsCount++] = &light_terrace_button;
-    light_garden_front_button = Light::Button(&BUTTON_SENSOR_DATA_GARDEN_FRONT, &light_garden_front);
+    light_garden_front_button = Light::Button(&Light::BUTTON_SENSOR_DATA_GARDEN_FRONT, &light_garden_front);
     sensors[sensorsCount++] = &light_garden_front_button;
-    light_garden_alley_button = Light::Button(&BUTTON_SENSOR_DATA_GARDEN_ALLEY, &light_garden_alley);
+    light_garden_alley_button = Light::Button(&Light::BUTTON_SENSOR_DATA_GARDEN_ALLEY, &light_garden_alley);
     sensors[sensorsCount++] = &light_garden_alley_button;
-    light_garden_corner_button = Light::Button(&BUTTON_SENSOR_DATA_GARDEN_CORNER, &light_garden_corner);
+    light_garden_corner_button = Light::Button(&Light::BUTTON_SENSOR_DATA_GARDEN_CORNER, &light_garden_corner);
     sensors[sensorsCount++] = &light_garden_corner_button;
 
     if (GARDEN_LIGHTS_COUNT != gardenLightsCount) {
@@ -159,12 +167,16 @@ void initLights() {
         Serial.println(bathroomLampsCount);
     }
 
-    Zone_garden = Light::Zone(&LIGHT_SENSOR_DATA_ZONE_GARDEN, gardenLights, GARDEN_LIGHTS_COUNT);
+    Zone_garden = Light::Zone(&Light::LIGHT_SENSOR_DATA_ZONE_GARDEN, gardenLights, GARDEN_LIGHTS_COUNT);
     sensors[sensorsCount++] = &Zone_garden;
-    light_zone_living_room = Light::Zone(&LIGHT_SENSOR_DATA_ZONE_LIVING_ROOM, livingRoomLamps, LIVING_ROOM_LIGHTS_COUNT);
+    light_zone_living_room = Light::Zone(&Light::LIGHT_SENSOR_DATA_ZONE_LIVING_ROOM, livingRoomLamps, LIVING_ROOM_LIGHTS_COUNT);
     sensors[sensorsCount++] = &light_zone_living_room;
-    light_zone_bathroom = Light::Zone(&LIGHT_SENSOR_DATA_ZONE_BATHROOM, bathroomLamps, BATHROOM_LAMPS_COUNT);
+    light_zone_bathroom = Light::Zone(&Light::LIGHT_SENSOR_DATA_ZONE_BATHROOM, bathroomLamps, BATHROOM_LAMPS_COUNT);
     sensors[sensorsCount++] = &light_zone_bathroom;
+
+}
+
+void initAlarm() {
 
 }
 
@@ -185,9 +197,6 @@ void initModuleManager() {
 
 }
 
-void initAlarm() {
-
-}
 
 void before() {
 #ifdef MY_DEBUG
