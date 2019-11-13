@@ -1,4 +1,5 @@
 #pragma once
+using namespace Core; 
 
 #include "../libs/core/artifacts/Sensor.hpp"
 
