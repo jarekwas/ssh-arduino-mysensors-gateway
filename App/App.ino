@@ -1,175 +1,234 @@
-#define MY_GATEWAY_SERIAL
-#define MY_DEBUG
 // Enable repeater functionality for this node
 #define MY_REPEATER_FEATURE
+#define MY_GATEWAY_SERIAL
 
-#include "conf.hpp"
+#define MY_RS485
+#define MY_RS485_DE_PIN 42
+#define MY_RS485_BAUD_RATE 9600
+
+
+
 #include <MySensors.h>
-#include "light/light.hpp"
-#include "sensor_configuration.hpp"
+#include "conf.hpp"
+
+#if CD_ENVIROMENT == 4
+#include "conf/prod.hpp"
+#else
+
+#include "conf/dev.hpp"
+
+#endif
+
+#include "libs/core/artifacts/Binary.hpp"
+#include "libs/core/artifacts/Sensor.hpp"
+#include "libs/core/artifacts/Controller.hpp"
+#include "libs/core/artifacts/Module.hpp"
+#include "libs/light/Lamp.hpp"
+#include "libs/light/Button.hpp"
+#include "libs/light/Zone.hpp"
+
+using namespace Core; 
+
+uint8_t sensorsCount = 0;
+uint8_t controllersCount = 0;
+
+#define SENSORS_COUNT 25
+Sensor *sensors[SENSORS_COUNT];
+
+#define CONTROLLERS_COUNT 0
+Controller *controllers[CONTROLLERS_COUNT];
+
+Module moduleManager;
 
 
-Lamp light_bathroom;
-Lamp light_living_room;
-Lamp light_bedroom;
-Lamp light_kitchen;
-Lamp light_kitchen_cabinet;
-Lamp light_bathroom_cabinet;
-Lamp light_treatment_plant;
-Lamp light_terrace;
-Lamp light_garden_front;
-Lamp light_garden_alley;
-Lamp light_arden_corner;
+#include <MySensors.h>
+#include "conf.hpp"
 
-LightZone light_zone_garden;
-LightZone light_zone_living_room;
-LightZone light_zone_bathroom;
+Light::Lamp light_bathroom;
+Light::Lamp light_living_room;
+Light::Lamp light_bedroom;
+Light::Lamp light_kitchen;
+Light::Lamp light_kitchen_cabinet;
+Light::Lamp light_bathroom_cabinet;
+Light::Lamp light_treatment_plant;
+Light::Lamp light_terrace;
+Light::Lamp light_garden_front;
+Light::Lamp light_garden_alley;
+Light::Lamp light_garden_corner;
 
-LigthButton button_bathroom;
-LigthButton button_living_room;
-LigthButton button_kitchen;
-LigthButton button_kitchen_cabinet;
-LigthButton button_bathroom_cabinet;
-LigthButton button_treatment_plant;
-LigthButton button_terrace;
-LigthButton button_garden_front;
-LigthButton button_garden_alley;
-LigthButton button_garden_corner;
+Light::Button light_bathroom_button;
+Light::Button light_living_room_button;
+Light::Button light_bedroom_button;
+Light::Button light_kitchen_button;
+Light::Button light_kitchen_cabinet_button;
+Light::Button light_bathroom_cabinet_button;
+Light::Button light_treatment_plant_button;
+Light::Button light_terrace_button;
+Light::Button light_garden_front_button;
+Light::Button light_garden_alley_button;
+Light::Button light_garden_corner_button;
 
+Light::Zone Zone_garden;
+Light::Zone light_zone_living_room;
+Light::Zone light_zone_bathroom;
 
-#define ALL_LAMPS_COUNT 14
-Lamp *all_lamps[ALL_LAMPS_COUNT];
-
-#define GARDEN_LIGHTS_COUNT 3
-Lamp *gardenLights[GARDEN_LIGHTS_COUNT];
+#define GARDEN_LIGHTS_COUNT 4
+Binary *gardenLights[GARDEN_LIGHTS_COUNT];
 
 #define LIVING_ROOM_LIGHTS_COUNT 2
-Lamp *livingRoomLamps[LIVING_ROOM_LIGHTS_COUNT];
-
-#define ALL_LAMPS_BUTTONS 10
-LigthButton *all_light_buttons[ALL_LAMPS_BUTTONS];
+Binary *livingRoomLamps[LIVING_ROOM_LIGHTS_COUNT];
 
 #define BATHROOM_LAMPS_COUNT 2
-Lamp *bathroomLamps[BATHROOM_LAMPS_COUNT];
+Binary *bathroomLamps[BATHROOM_LAMPS_COUNT];
 
-LightController light_controller;
-
-void initConfiguration() {
-    light_bathroom = Lamp(LIGHT_SENSOR_DATA_BATHROOM);
-    all_lamps[0] = &light_bathroom;
-
-    light_living_room = Lamp(LIGHT_SENSOR_DATA_LIVING_ROOM);
-    all_lamps[1] = &light_living_room;
-    livingRoomLamps[0] = &light_living_room;
-
-    light_bedroom = Lamp(LIGHT_SENSOR_DATA_BEDROOM);
-    all_lamps[2] = &light_bedroom;
-
-    light_kitchen = Lamp(LIGHT_SENSOR_DATA_KITCHEN);
-    all_lamps[3] = &light_kitchen;
-    livingRoomLamps[1] = &light_kitchen;
-
-    light_kitchen_cabinet = Lamp(LIGHT_SENSOR_DATA_KITCHEN_CABINET);
-    all_lamps[4] = &light_kitchen_cabinet;
-
-    light_bathroom_cabinet = Lamp(LIGHT_SENSOR_DATA_BATHROOM_CABINET);
-    all_lamps[5] = &light_bathroom_cabinet;
-
-    light_treatment_plant = Lamp(LIGHT_SENSOR_DATA_TREATMENT_PLANT);
-    all_lamps[6] = &light_treatment_plant;
-
-    light_terrace = Lamp(LIGHT_SENSOR_DATA_TERRACE);
-    all_lamps[7] = &light_terrace;
-
-    light_garden_front = Lamp(LIGHT_SENSOR_DATA_GARDEN_FRONT);
-    all_lamps[8] = &light_garden_front;
-    gardenLights[0] = &light_garden_front;
-
-    light_garden_alley = Lamp(LIGHT_SENSOR_DATA_GARDEN_ALLEY);
-    all_lamps[9] = &light_garden_alley;
-    gardenLights[1] = &light_garden_alley;
-
-    light_arden_corner = Lamp(LIGHT_SENSOR_DATA_GARDEN_CORNER);
-    all_lamps[10] = &light_arden_corner;
-    gardenLights[2] = &light_arden_corner;
-
-    light_zone_garden = LightZone(LIGHT_SENSOR_DATA_ZONE_GARDEN, gardenLights, GARDEN_LIGHTS_COUNT);
-    all_lamps[11] = &light_zone_garden;
-
-    light_zone_living_room = LightZone(LIGHT_SENSOR_DATA_ZONE_LIVING_ROOM, livingRoomLamps, LIVING_ROOM_LIGHTS_COUNT);
-    all_lamps[12] = &light_zone_living_room;
-
-    light_zone_bathroom = LightZone(LIGHT_SENSOR_DATA_ZONE_BATHROOM, bathroomLamps, BATHROOM_LAMPS_COUNT);
-    all_lamps[13] = &light_zone_bathroom;
+void initLights() {
 
 
-    button_bathroom = LigthButton(BUTTON_SENSOR_DATA_BATHROOM, &light_bathroom);
-    all_light_buttons[0] = &button_bathroom;
-
-    button_living_room = LigthButton(BUTTON_SENSOR_DATA_LIVING_ROOM, &light_living_room);
-    all_light_buttons[1] = &button_living_room;
-
-    button_kitchen = LigthButton(BUTTON_SENSOR_DATA_KITCHEN, &light_kitchen);
-    all_light_buttons[2] = &button_kitchen;
-
-    button_kitchen_cabinet = LigthButton(BUTTON_SENSOR_DATA_KITCHEN_CABINET, &light_kitchen_cabinet);
-    all_light_buttons[3] = &button_kitchen_cabinet;
-
-    button_bathroom_cabinet = LigthButton(BUTTON_SENSOR_DATA_BATHROOM_CABINET, &light_bathroom_cabinet);
-    all_light_buttons[4] = &button_bathroom_cabinet;
-
-    button_treatment_plant = LigthButton(BUTTON_SENSOR_DATA_TREATMENT_PLANT, &light_treatment_plant);
-    all_light_buttons[5] = &button_treatment_plant;
-
-    button_terrace = LigthButton(BUTTON_SENSOR_DATA_TERRACE, &light_terrace);
-    all_light_buttons[6] = &button_terrace;
-
-    button_garden_front = LigthButton(BUTTON_SENSOR_DATA_GARDEN_FRONT, &light_garden_front);
-    all_light_buttons[7] = &button_garden_front;
-
-    button_garden_alley = LigthButton(BUTTON_SENSOR_DATA_GARDEN_ALLEY, &light_garden_alley);
-    all_light_buttons[8] = &button_garden_alley;
-
-    button_garden_corner = LigthButton(BUTTON_SENSOR_DATA_GARDEN_CORNER, &light_arden_corner);
-    all_light_buttons[9] = &button_garden_corner;
+    uint8_t gardenLightsCount = 0;
+    uint8_t livingRoomLampsCount = 0;
+    uint8_t bathroomLampsCount = 0;
 
 
-    light_controller = LightController(all_lamps, ALL_LAMPS_COUNT, all_light_buttons, ALL_LAMPS_BUTTONS);
-    Serial.println(light_controller.toString());
+    light_bathroom = Light::Lamp(&Light::LIGHT_SENSOR_DATA_BATHROOM);
+    bathroomLamps[bathroomLampsCount++] = &light_bathroom;
+    sensors[sensorsCount++] = &light_bathroom;
+
+    light_bathroom_cabinet = Light::Lamp(&Light::LIGHT_SENSOR_DATA_BATHROOM_CABINET);
+    bathroomLamps[bathroomLampsCount++] = &light_bathroom_cabinet;
+    sensors[sensorsCount++] = &light_bathroom_cabinet;
+
+    light_living_room = Light::Lamp(&Light::LIGHT_SENSOR_DATA_LIVING_ROOM);
+    livingRoomLamps[livingRoomLampsCount++] = &light_living_room;
+    sensors[sensorsCount++] = &light_living_room;
+
+    light_bedroom = Light::Lamp(&Light::LIGHT_SENSOR_DATA_BEDROOM);
+    sensors[sensorsCount++] = &light_bedroom;
+
+    light_kitchen = Light::Lamp(&Light::LIGHT_SENSOR_DATA_KITCHEN);
+    livingRoomLamps[livingRoomLampsCount++] = &light_kitchen;
+    sensors[sensorsCount++] = &light_kitchen;
+
+    light_kitchen_cabinet = Light::Lamp(&Light::LIGHT_SENSOR_DATA_KITCHEN_CABINET);
+    sensors[sensorsCount++] = &light_kitchen_cabinet;
+
+    light_treatment_plant = Light::Lamp(&Light::LIGHT_SENSOR_DATA_TREATMENT_PLANT);
+    sensors[sensorsCount++] = &light_treatment_plant;
+
+    light_terrace = Light::Lamp(&Light::LIGHT_SENSOR_DATA_TERRACE);
+    gardenLights[gardenLightsCount++] = &light_terrace;
+    sensors[sensorsCount++] = &light_terrace;
+
+    light_garden_front = Light::Lamp(&Light::LIGHT_SENSOR_DATA_GARDEN_FRONT);
+    gardenLights[gardenLightsCount++] = &light_garden_front;
+    sensors[sensorsCount++] = &light_garden_front;
+
+    light_garden_alley = Light::Lamp(&Light::LIGHT_SENSOR_DATA_GARDEN_ALLEY);
+    gardenLights[gardenLightsCount++] = &light_garden_alley;
+    sensors[sensorsCount++] = &light_garden_alley;
+
+    light_garden_corner = Light::Lamp(&Light::LIGHT_SENSOR_DATA_GARDEN_CORNER);
+    gardenLights[gardenLightsCount++] = &light_garden_corner;
+    sensors[sensorsCount++] = &light_garden_corner;
+
+
+    light_bathroom_button = Light::Button(&Light::BUTTON_SENSOR_DATA_BATHROOM, &light_bathroom);
+    sensors[sensorsCount++] = &light_bathroom_button;
+    light_living_room_button = Light::Button(&Light::BUTTON_SENSOR_DATA_LIVING_ROOM, &light_living_room);
+    sensors[sensorsCount++] = &light_living_room_button;
+    light_bedroom_button = Light::Button(&Light::BUTTON_SENSOR_DATA_BEDROOM, &light_bedroom);
+    sensors[sensorsCount++] = &light_bedroom_button;
+    light_kitchen_button = Light::Button(&Light::BUTTON_SENSOR_DATA_KITCHEN, &light_kitchen);
+    sensors[sensorsCount++] = &light_kitchen_button;
+    light_kitchen_cabinet_button = Light::Button(&Light::BUTTON_SENSOR_DATA_KITCHEN_CABINET, &light_kitchen_cabinet);
+    sensors[sensorsCount++] = &light_kitchen_cabinet_button;
+    light_bathroom_cabinet_button = Light::Button(&Light::BUTTON_SENSOR_DATA_BATHROOM_CABINET, &light_bathroom_cabinet);
+    sensors[sensorsCount++] = &light_bathroom_cabinet_button;
+    light_treatment_plant_button = Light::Button(&Light::BUTTON_SENSOR_DATA_TREATMENT_PLANT, &light_treatment_plant);
+    sensors[sensorsCount++] = &light_treatment_plant_button;
+    light_terrace_button = Light::Button(&Light::BUTTON_SENSOR_DATA_TERRACE, &light_terrace);
+    sensors[sensorsCount++] = &light_terrace_button;
+    light_garden_front_button = Light::Button(&Light::BUTTON_SENSOR_DATA_GARDEN_FRONT, &light_garden_front);
+    sensors[sensorsCount++] = &light_garden_front_button;
+    light_garden_alley_button = Light::Button(&Light::BUTTON_SENSOR_DATA_GARDEN_ALLEY, &light_garden_alley);
+    sensors[sensorsCount++] = &light_garden_alley_button;
+    light_garden_corner_button = Light::Button(&Light::BUTTON_SENSOR_DATA_GARDEN_CORNER, &light_garden_corner);
+    sensors[sensorsCount++] = &light_garden_corner_button;
+
+    if (GARDEN_LIGHTS_COUNT != gardenLightsCount) {
+        Serial.print(F("Bledna wartosc GARDEN_LIGHTS_COUNT, poprawna: "));
+        Serial.println(gardenLightsCount);
+    }
+    if (LIVING_ROOM_LIGHTS_COUNT != livingRoomLampsCount) {
+        Serial.print(F("Bledna wartosc LIVING_ROOM_LIGHTS_COUNT, poprawna: "));
+        Serial.println(livingRoomLampsCount);
+    }
+    if (BATHROOM_LAMPS_COUNT != bathroomLampsCount) {
+        Serial.print(F("Bledna wartosc BATHROOM_LAMPS_COUNT, poprawna: "));
+        Serial.println(bathroomLampsCount);
+    }
+
+    Zone_garden = Light::Zone(&Light::LIGHT_SENSOR_DATA_ZONE_GARDEN, gardenLights, GARDEN_LIGHTS_COUNT);
+    sensors[sensorsCount++] = &Zone_garden;
+    light_zone_living_room = Light::Zone(&Light::LIGHT_SENSOR_DATA_ZONE_LIVING_ROOM, livingRoomLamps, LIVING_ROOM_LIGHTS_COUNT);
+    sensors[sensorsCount++] = &light_zone_living_room;
+    light_zone_bathroom = Light::Zone(&Light::LIGHT_SENSOR_DATA_ZONE_BATHROOM, bathroomLamps, BATHROOM_LAMPS_COUNT);
+    sensors[sensorsCount++] = &light_zone_bathroom;
 
 }
 
+void initAlarm() {
+
+}
+
+void initModuleManager() {
+
+    initLights();
+    initAlarm();
+
+    if (SENSORS_COUNT != sensorsCount) {
+        Serial.print(F("Bledna wartosc SENSORS_COUNT, poprawna: "));
+        Serial.println(sensorsCount);
+    }
+    if (CONTROLLERS_COUNT != controllersCount) {
+        Serial.print(F("Bledna wartosc CONTROLLERS_COUNT, poprawna: "));
+        Serial.println(controllersCount);
+    }
+    moduleManager = Module(sensors, SENSORS_COUNT, controllers, CONTROLLERS_COUNT);
+
+}
+
+
 void before() {
 #ifdef MY_DEBUG
-    Serial.println("before()");
+    Serial.println(F("before()"));
 #endif
-    initConfiguration();
+
+    initModuleManager();
 }
 
 void setup() {
 #ifdef MY_DEBUG
-    Serial.println("setup()");
+    Serial.println(F("setup()"));
 #endif
-    light_controller.setup();
+    moduleManager.setup();
     requestTime();
 }
 
 void presentation() {
     sendSketchInfo("Central Gateway", APP_VERSION);
-    light_controller.present();
+    moduleManager.presentSensors();
 }
 
 void loop() {
-    light_controller.run();
-    // wait(10000);
-    // sendHeartbeat();
+    moduleManager.read();
+    moduleManager.execute();
+// sendHeartbeat();
 }
 
 void receive(const MyMessage &message) {
-    light_controller.receive(message);
+    moduleManager.receive(message);
 }
 
 void receiveTime(uint32_t ts) {
-    Serial.print(F("TimeStamo"));
-    Serial.println(ts);
+    moduleManager.setTime(ts);
 }

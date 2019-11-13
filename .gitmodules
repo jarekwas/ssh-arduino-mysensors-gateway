@@ -1,0 +1,3 @@
+[submodule "App/libs"]
+	path = App/libs
+	url = ../ssh-mysensors-lib.git

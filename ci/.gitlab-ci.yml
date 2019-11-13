@@ -1,0 +1,22 @@
+image: greetingsfrompoland/ssh-rbi-arduino-cicd:latest
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
+stages:
+  - compile
+  - deploy
+
+compile:
+  variables:
+    CD_ENVIROMENT: 5
+  script:
+    - sh ./ci/compile.sh
+  stage: compile
+
+
+deploy:
+  when: manual
+  script:
+    - curl -X POST -F token=$ENV_DEPLOY_AUTH_TOKEN -F ref=master -F "variables[BUILD_SOURCE]=arduinoLanguage" -F "variables[APP_COMMIT_SHA]=$CI_COMMIT_SHA" $ENV_DEPLOY_PROD_PIPELINE_API_URL
+  stage: deploy
